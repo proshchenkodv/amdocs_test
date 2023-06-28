@@ -4,7 +4,6 @@ import java.util.Deque;
 public class EvalOptimisedAndRefactored {
 
     public static int evaluate(String expression) {
-        expression.replace(" ", "");
         char[] tokens = expression.toCharArray();
         Deque<Integer> values = new ArrayDeque<>();
         Deque<Character> operators = new ArrayDeque<>();
