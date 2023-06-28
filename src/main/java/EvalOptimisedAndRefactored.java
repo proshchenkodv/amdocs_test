@@ -60,7 +60,7 @@ public class EvalOptimisedAndRefactored {
                 }
                 return operand1 / operand2;
             default:
-                return 0;
+                throw new UnsupportedOperationException("Invalid operator: " + operator);
         }
     }
 

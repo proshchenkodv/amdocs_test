@@ -20,7 +20,6 @@ class EvalTest {
         "' 222 * ( 2 + 5 ) / 14'|111",
         "' 222 * ( 12 + ( 1 - 3 ) * 2 ) / 8'|222",
         "'4+2*(5-2)'|10",
-        "1(2+3|0",
         "1 + 0|1",
     })
     void testEval(String expression, int expected) {
@@ -40,6 +39,7 @@ class EvalTest {
         "'3++'|java.util.EmptyStackException|",
         "'3 / 0'|java.lang.UnsupportedOperationException|Cannot divide by zero",
         "'1 2 3 + 4 )'|java.util.EmptyStackException|",
+        "1(2+3|java.lang.UnsupportedOperationException|Invalid operator: (",
     })
     void testFailure_Eval(String expression, Class<? extends Throwable> exceptionType, String message) {
         Throwable throwable = assertThrows(exceptionType, () -> Eval.evaluate(expression));
@@ -60,6 +60,7 @@ class EvalTest {
         "'3++'|java.util.NoSuchElementException|",
         "'3 / 0'|java.lang.UnsupportedOperationException|Cannot divide by zero",
         "'1 2 3 + 4 )'|java.util.NoSuchElementException|",
+        "1(2+3|java.lang.UnsupportedOperationException|Invalid operator: (",
     })
     void testFailure_EvalOptimisedAndRefactored(String expression, Class<? extends Throwable> exceptionType, String message) {
         Throwable throwable = assertThrows(exceptionType, () -> EvalOptimisedAndRefactored.evaluate(expression));

@@ -78,7 +78,7 @@ public class Eval {
                 }
                 return a / b;
         }
-        return 0;
+        throw new UnsupportedOperationException("Invalid operator: " + op);
     }
 
 }
