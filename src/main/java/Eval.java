@@ -1,16 +1,6 @@
 import java.util.Stack;
 
 public class Eval {
-    public static void main(String[] args) {
-        test(" 3 + 4", 7);
-        test(" 5 + 2 * 6", 17);
-        test(" 10 * 7 + 5", 75);
-        test(" 111 * ( 2 + 3 )", 555);
-        test(" 112 * ( 2 + 3 )", 560);
-        test(" 222 * ( 2 + 5 ) / 14", 111);
-        test(" 222 * ( 12 + ( 1 - 3 ) * 2 ) / 8", 222);
-        test("4+2*(5-2)", 10);
-    }
 
     public static int evaluate(String expression) {
         char[] tokens = expression.toCharArray();
@@ -98,12 +88,4 @@ public class Eval {
         return 0;
     }
 
-    private static void test(String str, int expect) {
-        int result = evaluate(str);
-        if (result == expect) {
-            System.out.println("CORRECT!");
-        } else {
-            System.out.println(str + " should be evaluated to " + expect + ", but was " + result);
-        }
-    }
 }
