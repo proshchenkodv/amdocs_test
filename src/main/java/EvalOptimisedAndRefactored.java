@@ -1,5 +1,6 @@
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.function.Predicate;
 
 public class EvalOptimisedAndRefactored {
 
@@ -18,27 +19,27 @@ public class EvalOptimisedAndRefactored {
             } else if (tokens[i] == '(') {
                 operators.push(tokens[i]);
             } else if (tokens[i] == ')') {
-                while (!operators.isEmpty() && operators.peek() != '(') {
-                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-                }
+                applyOperators(operators, values, operator -> operator != '(');
                 operators.pop();
             } else if (isOperator(tokens[i])) {
-                while (!operators.isEmpty() && shouldBeApplyBefore(operators.peek())) {
-                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-                }
+                applyOperators(operators, values, EvalOptimisedAndRefactored::shouldBeApplyBefore);
                 operators.push(tokens[i]);
             }
         }
 
-        while (!operators.isEmpty()) {
-            values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-        }
+        applyOperators(operators, values, __ -> true);
 
         return values.pop();
     }
 
     public static boolean shouldBeApplyBefore(char operator2) {
         return operator2 == '*' || operator2 == '/';
+    }
+
+    private static void applyOperators(Deque<Character> ops, Deque<Integer> values, Predicate<Character> opTest) {
+        while (!ops.isEmpty() && opTest.test(ops.peek())) {
+            values.push(applyOperator(ops.pop(), values.pop(), values.pop()));
+        }
     }
 
     public static int applyOperator(char operator, int operand2, int operand1) {
