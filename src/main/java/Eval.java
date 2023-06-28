@@ -68,25 +68,6 @@ public class Eval {
         return values.pop();
     }
 
-    public static boolean isOperator(char token) {
-        return token == '+' || token == '-' || token == '*' || token == '/';
-    }
-
-    public static boolean shouldApplyBefore(char op1, char op2) {
-        switch (op2) {
-            case '(':
-                return false;
-            case '+':
-            case '-':
-                return op1 != '*' && op1 != '/';
-            case '*':
-            case '/':
-                return op1 == '+' || op1 == '-';
-            default:
-                return false;
-        }
-    }
-
     // Returns true if 'op2' has higher or same precedence as 'op1', otherwise returns false.
     public static boolean hasPrecedence(char op1, char op2) {
         if (op2 == '(' || op2 == ')') {
