@@ -4,9 +4,9 @@ import java.util.function.Predicate;
 
 public class EvalOptimisedAndRefactored {
 
-    public static int evaluate(String expression) {
+    public static double evaluate(String expression) {
         char[] tokens = expression.toCharArray();
-        Deque<Integer> values = new ArrayDeque<>();
+        Deque<Double> values = new ArrayDeque<>();
         Deque<Character> operators = new ArrayDeque<>();
 
         for (int i = 0; i < tokens.length; i++) {
@@ -28,12 +28,12 @@ public class EvalOptimisedAndRefactored {
         return values.pop();
     }
 
-    private static int readValue(char[] tokens, Deque<Integer> values, int start) {
+    private static int readValue(char[] tokens, Deque<Double> values, int start) {
         int count = 1;
         while (start + count < tokens.length && Character.isDigit(tokens[start + count])) {
             count++;
         }
-        values.push(Integer.valueOf(String.valueOf(tokens, start, count--)));
+        values.push(Double.valueOf(String.valueOf(tokens, start, count--)));
         return count;
     }
 
@@ -41,13 +41,13 @@ public class EvalOptimisedAndRefactored {
         return operator2 == '*' || operator2 == '/';
     }
 
-    private static void applyOperators(Deque<Character> ops, Deque<Integer> values, Predicate<Character> opTest) {
+    private static void applyOperators(Deque<Character> ops, Deque<Double> values, Predicate<Character> opTest) {
         while (!ops.isEmpty() && opTest.test(ops.peek())) {
             values.push(applyOperator(ops.pop(), values.pop(), values.pop()));
         }
     }
 
-    public static int applyOperator(char operator, int operand2, int operand1) {
+    public static double applyOperator(char operator, double operand2, double operand1) {
         switch (operator) {
             case '-':
                 return operand1 - operand2;

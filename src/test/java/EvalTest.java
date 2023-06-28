@@ -22,12 +22,14 @@ class EvalTest {
         "'4+2*(5-2)'|10",
         "1 + 0|1",
         "1a+2b|3",
+        "222 * ( 2 + 5 ) / 16|97.125",
+        "2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10|1.7999999999999998",//todo 1.8
     })
-    void testEval(String expression, int expected) {
-        assertEquals(expected, Eval.evaluate(expression), "Eval");
+    void testEval(String expression, double expected) {
+        assertEquals(expected, Eval.evaluate(expression), 0.00000000000000001, "Eval");
         //Отдельному классу - отдельный тест.
         //Но правильно было бы не создавать второй класс, а вносить правки в существующий - увидеть разницу нам поможет git.
-        assertEquals(expected, EvalOptimisedAndRefactored.evaluate(expression), "EvalOptimisedAndRefactored");
+        assertEquals(expected, EvalOptimisedAndRefactored.evaluate(expression), 0.00000000000000001, "EvalOptimisedAndRefactored");
     }
 
     @DisplayName("Should fail on evaluate expression: Eval")
