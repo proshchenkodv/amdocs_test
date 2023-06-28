@@ -28,7 +28,7 @@ public class EvalOptimisedAndRefactored {
                 }
                 operators.pop();
             } else if (isOperator(tokens[i])) {
-                while (!operators.isEmpty() && shouldBeApplyBefore(tokens[i], operators.peek())) {
+                while (!operators.isEmpty() && shouldBeApplyBefore(operators.peek())) {
                     values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
                 }
                 operators.push(tokens[i]);
@@ -42,19 +42,8 @@ public class EvalOptimisedAndRefactored {
         return values.pop();
     }
 
-    public static boolean shouldBeApplyBefore(char operator1, char operator2) {
-        switch (operator2) {
-            case '(':
-                return false;
-            case '+':
-            case '-':
-                return operator1 != '*' && operator1 != '/';
-            case '*':
-            case '/':
-                return operator1 != '*';
-            default:
-                return false;
-        }
+    public static boolean shouldBeApplyBefore(char operator2) {
+        return operator2 == '*' || operator2 == '/';
     }
 
     public static int applyOperator(char operator, int operand2, int operand1) {
