@@ -16,10 +16,11 @@ public class EvalOptimisedAndRefactored {
 
     private static void test(String str, int expect) {
         int result = evaluate(str);
-        if (result == expect)
+        if (result == expect) {
             System.out.println("CORRECT!");
-        else
+        } else {
             System.out.println(str + " should be evaluated to " + expect + ", but was " + result);
+        }
     }
 
     public static int evaluate(String expression) {
@@ -29,7 +30,9 @@ public class EvalOptimisedAndRefactored {
         Deque<Character> operators = new ArrayDeque<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i] == ' ') continue;
+            if (tokens[i] == ' ') {
+                continue;
+            }
 
             if (Character.isDigit(tokens[i])) {
                 StringBuilder sbuf = new StringBuilder();
@@ -84,7 +87,9 @@ public class EvalOptimisedAndRefactored {
             case '*':
                 return operand1 * operand2;
             case '/':
-                if (operand2 == 0) throw new UnsupportedOperationException("Cannot divide by zero");
+                if (operand2 == 0) {
+                    throw new UnsupportedOperationException("Cannot divide by zero");
+                }
                 return operand1 / operand2;
             default:
                 return 0;
