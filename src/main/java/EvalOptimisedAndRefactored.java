@@ -11,11 +11,7 @@ public class EvalOptimisedAndRefactored {
 
         for (int i = 0; i < tokens.length; i++) {
             if (Character.isDigit(tokens[i])) {
-                int start = i;
-                do {
-                    i++;
-                } while (i < tokens.length && Character.isDigit(tokens[i]));
-                values.push(Integer.valueOf(String.valueOf(tokens, start, i-- - start)));
+                i += readValue(tokens, values, i);
             } else if (tokens[i] == '(') {
                 operators.push(tokens[i]);
             } else if (tokens[i] == ')') {
@@ -30,6 +26,15 @@ public class EvalOptimisedAndRefactored {
         applyOperators(operators, values, __ -> true);
 
         return values.pop();
+    }
+
+    private static int readValue(char[] tokens, Deque<Integer> values, int start) {
+        int count = 1;
+        while (start + count < tokens.length && Character.isDigit(tokens[start + count])) {
+            count++;
+        }
+        values.push(Integer.valueOf(String.valueOf(tokens, start, count--)));
+        return count;
     }
 
     public static boolean shouldBeApplyBefore(char operator2) {
