@@ -10,12 +10,11 @@ public class EvalOptimisedAndRefactored {
 
         for (int i = 0; i < tokens.length; i++) {
             if (Character.isDigit(tokens[i])) {
-                StringBuilder sbuf = new StringBuilder();
-                while (i < tokens.length && Character.isDigit(tokens[i])) {
-                    sbuf.append(tokens[i++]);
-                }
-                i--;
-                values.push(Integer.parseInt(sbuf.toString()));
+                int start = i;
+                do {
+                    i++;
+                } while (i < tokens.length && Character.isDigit(tokens[i]));
+                values.push(Integer.valueOf(String.valueOf(tokens, start, i-- - start)));
             } else if (tokens[i] == '(') {
                 operators.push(tokens[i]);
             } else if (tokens[i] == ')') {
