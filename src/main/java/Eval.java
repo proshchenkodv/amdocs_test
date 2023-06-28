@@ -11,11 +11,6 @@ public class Eval {
         Stack<Character> ops = new Stack<Character>();
 
         for (int i = 0; i < tokens.length; i++) {
-            // Current token is a whitespace, skip it
-            if (tokens[i] == ' ') {
-                continue;
-            }
-
             // Current token is a number, push it to stack for numbers
             if (tokens[i] >= '0' && tokens[i] <= '9') {
                 StringBuilder sbuf = new StringBuilder();

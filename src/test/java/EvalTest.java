@@ -21,6 +21,7 @@ class EvalTest {
         "' 222 * ( 12 + ( 1 - 3 ) * 2 ) / 8'|222",
         "'4+2*(5-2)'|10",
         "1 + 0|1",
+        "1a+2b|3",
     })
     void testEval(String expression, int expected) {
         assertEquals(expected, Eval.evaluate(expression), "Eval");

@@ -9,10 +9,6 @@ public class EvalOptimisedAndRefactored {
         Deque<Character> operators = new ArrayDeque<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i] == ' ') {
-                continue;
-            }
-
             if (Character.isDigit(tokens[i])) {
                 StringBuilder sbuf = new StringBuilder();
                 while (i < tokens.length && Character.isDigit(tokens[i])) {
