@@ -1,93 +1,75 @@
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.function.Predicate;
+
+import static java.math.BigDecimal.ZERO;
 
 public class EvalOptimisedAndRefactored {
 
-    public static void main(String[] args) {
-        test(" 3 + 4", 7);
-        test(" 5 + 2 * 6", 17);
-        test(" 10 * 7 + 5", 75);
-        test(" 111 * ( 2 + 3 )", 555);
-        test(" 112 * ( 2 + 3 )", 560);
-        test(" 222 * ( 2 + 5 ) / 14", 111);
-        test(" 222 * ( 12 + ( 1 - 3 ) * 2 ) / 8", 222);
-        test("4+2*(5-2)", 10);
-    }
-
-    private static void test(String str, int expect) {
-        int result = evaluate(str);
-        if (result == expect)
-            System.out.println("CORRECT!");
-        else
-            System.out.println(str + " should be evaluated to " + expect + ", but was " + result);
-    }
-
-    public static int evaluate(String expression) {
-        expression.replace(" ", "");
+    public static BigDecimal evaluate(String expression) {
         char[] tokens = expression.toCharArray();
-        Deque<Integer> values = new ArrayDeque<>();
+        Deque<BigDecimal> values = new ArrayDeque<>();
         Deque<Character> operators = new ArrayDeque<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i] == ' ') continue;
-
-            if (Character.isDigit(tokens[i])) {
-                StringBuilder sbuf = new StringBuilder();
-                while (i < tokens.length && Character.isDigit(tokens[i])) {
-                    sbuf.append(tokens[i++]);
-                }
-                i--;
-                values.push(Integer.parseInt(sbuf.toString()));
+            if (isDigit(tokens[i])) {
+                i += readValue(tokens, values, i);
             } else if (tokens[i] == '(') {
                 operators.push(tokens[i]);
             } else if (tokens[i] == ')') {
-                while (!operators.isEmpty() && operators.peek() != '(') {
-                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-                }
+                applyOperators(operators, values, operator -> operator != '(');
                 operators.pop();
             } else if (isOperator(tokens[i])) {
-                while (!operators.isEmpty() && shouldBeApplyBefore(tokens[i], operators.peek())) {
-                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-                }
+                applyOperators(operators, values, EvalOptimisedAndRefactored::shouldBeApplyBefore);
                 operators.push(tokens[i]);
             }
         }
 
-        while (!operators.isEmpty()) {
-            values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-        }
+        applyOperators(operators, values, __ -> true);
 
         return values.pop();
     }
 
-    public static boolean shouldBeApplyBefore(char operator1, char operator2) {
-        switch (operator2) {
-            case '(':
-                return false;
-            case '+':
-            case '-':
-                return operator1 != '*' && operator1 != '/';
-            case '*':
-            case '/':
-                return operator1 != '*';
-            default:
-                return false;
+    private static boolean isDigit(char token) {
+        return token == '.' || Character.isDigit(token);
+    }
+
+    private static int readValue(char[] tokens, Deque<BigDecimal> values, int start) {
+        int count = 1;
+        while (start + count < tokens.length && isDigit(tokens[start + count])) {
+            count++;
+        }
+        values.push(new BigDecimal(String.valueOf(tokens, start, count--)));
+        return count;
+    }
+
+    public static boolean shouldBeApplyBefore(char operator2) {
+        return operator2 == '*' || operator2 == '/';
+    }
+
+    private static void applyOperators(Deque<Character> ops, Deque<BigDecimal> values, Predicate<Character> opTest) {
+        while (!ops.isEmpty() && opTest.test(ops.peek())) {
+            values.push(applyOperator(ops.pop(), values.pop(), values.pop()));
         }
     }
 
-    public static int applyOperator(char operator, int operand2, int operand1) {
+    public static BigDecimal applyOperator(char operator, BigDecimal operand2, BigDecimal operand1) {
         switch (operator) {
             case '-':
-                return operand1 - operand2;
+                return operand1.subtract(operand2);
             case '+':
-                return operand1 + operand2;
+                return operand1.add(operand2);
             case '*':
-                return operand1 * operand2;
+                return operand1.multiply(operand2);
             case '/':
-                if (operand2 == 0) throw new UnsupportedOperationException("Cannot divide by zero");
-                return operand1 / operand2;
+                if (operand2.equals(ZERO)) {
+                    throw new UnsupportedOperationException("Cannot divide by zero");
+                }
+                return operand1.divide(operand2, MathContext.DECIMAL64);
             default:
-                return 0;
+                throw new UnsupportedOperationException("Invalid operator: " + operator);
         }
     }
 

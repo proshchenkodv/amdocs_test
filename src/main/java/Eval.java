@@ -1,122 +1,84 @@
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Stack;
+import java.util.function.Predicate;
+
+import static java.math.BigDecimal.ZERO;
 
 public class Eval {
-    public static void main(String[] args) {
-        test(" 3 + 4", 7);
-        test(" 5 + 2 * 6", 17);
-        test(" 10 * 7 + 5", 75);
-        test(" 111 * ( 2 + 3 )", 555);
-        test(" 112 * ( 2 + 3 )", 560);
-        test(" 222 * ( 2 + 5 ) / 14", 111);
-        test(" 222 * ( 12 + ( 1 - 3 ) * 2 ) / 8", 222);
-        test("4+2*(5-2)", 10);
-    }
 
-    public static int evaluate(String expression) {
+    public static BigDecimal evaluate(String expression) {
         char[] tokens = expression.toCharArray();
 
         // Stack for numbers: 'values'
-        Stack<Integer> values = new Stack<Integer>();
+        Stack<BigDecimal> values = new Stack<>();
         // Stack for Operators: 'ops'
-        Stack<Character> ops = new Stack<Character>();
+        Stack<Character> ops = new Stack<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            // Current token is a whitespace, skip it
-            if (tokens[i] == ' ')
-                continue;
-
-            // Current token is a number, push it to stack for numbers
-            if (tokens[i] > '0' && tokens[i] <= '9') {
-                StringBuilder sbuf = new StringBuilder();
-
-                // There may be more than one digit in a number
-                while (i < tokens.length && tokens[i] >= '0' && tokens[i] <= '9') {
-                    sbuf.append(tokens[i++]);
-                }
-                i--;
-                values.push(Integer.parseInt(sbuf.toString()));
-            }
-
-            // Current token is an opening brace, push it to 'ops'
-            else if (tokens[i] == '(')
+            if (isDigit(tokens[i])) {
+                // Current token is a number, push it to stack for numbers
+                i += readValue(expression, tokens, values, i);
+            } else if (tokens[i] == '(') {
+                // Current token is an opening brace, push it to 'ops'
                 ops.push(tokens[i]);
-
+            } else if (tokens[i] == ')') {
                 // Closing brace encountered, solve entire brace
-            else if (tokens[i] == ')') {
-                while (ops.peek() != '(') {
-                    values.push(applyOp(ops.pop(), values.pop(), values.pop()));
-                }
+                applyOps(ops, values, op -> op != '(');
                 ops.pop();
-            }
-
-            // Current token is an operator.
-            else if (tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/') {
-                while (!ops.empty() && hasPrecedence(tokens[i], ops.peek())) {
-                    values.push(applyOp(ops.pop(), values.pop(), values.pop()));
-                }
+            } else if (tokens[i] == '+' || tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/') {
+                // Current token is an operator.
+                applyOps(ops, values, Eval::hasPrecedence);
                 ops.push(tokens[i]);
             }
         }
 
         // Entire expression has been parsed at this point, apply remaining ops to remaining values
-        while (!ops.empty())
-            values.push(applyOp(ops.pop(), values.pop(), values.pop()));
+        applyOps(ops, values, __ -> true);
 
         return values.pop();
     }
 
-    public static boolean isOperator(char token) {
-        return token == '+' || token == '-' || token == '*' || token == '/';
+    private static boolean isDigit(char token) {
+        return token == '.' || token >= '0' && token <= '9';
     }
 
-    public static boolean shouldApplyBefore(char op1, char op2) {
-        switch (op2) {
-            case '(':
-                return false;
-            case '+':
-            case '-':
-                return op1 != '*' && op1 != '/';
-            case '*':
-            case '/':
-                return op1 == '+' || op1 == '-';
-            default:
-                return false;
-        }
+    private static int readValue(String expression, char[] tokens, Stack<BigDecimal> values, int start) {
+        int end = start;
+        do {
+            end++;
+        } while (end < tokens.length && isDigit(tokens[end]));
+        values.push(new BigDecimal(expression.substring(start, end)));
+        return end - start - 1;
     }
 
     // Returns true if 'op2' has higher or same precedence as 'op1', otherwise returns false.
-    public static boolean hasPrecedence(char op1, char op2) {
-        if (op2 == '(' || op2 == ')')
-            return false;
-        if (op1 == '*' || op1 == '/')
-            return false;
-        else
-            return true;
+    public static boolean hasPrecedence(char op2) {
+        return op2 == '*' || op2 == '/';
+    }
+
+    private static void applyOps(Stack<Character> ops, Stack<BigDecimal> values, Predicate<Character> opTest) {
+        while (!ops.isEmpty() && opTest.test(ops.peek())) {
+            values.push(applyOp(ops.pop(), values.pop(), values.pop()));
+        }
     }
 
     // A utility method to apply an operator 'op' on operands 'a' and 'b'. Return the result.
-    public static int applyOp(char op, int b, int a) {
+    public static BigDecimal applyOp(char op, BigDecimal b, BigDecimal a) {
         switch (op) {
             case '-':
-                return a - b;
+                return a.subtract(b);
             case '+':
-                return a + b;
+                return a.add(b);
             case '*':
-                return a * b;
+                return a.multiply(b);
             case '/':
-                if (b == 0) throw new UnsupportedOperationException("Cannot divide by zero");
-                return a / b;
+                if (b.equals(ZERO)) {
+                    throw new UnsupportedOperationException("Cannot divide by zero");
+                }
+                return a.divide(b, MathContext.DECIMAL64);
         }
-        return 0;
+        throw new UnsupportedOperationException("Invalid operator: " + op);
     }
 
-    private static void test(String str, int expect) {
-        int result = evaluate(str);
-        if (result == expect)
-            System.out.println("CORRECT!");
-        else
-            System.out.println(str + " should be evaluated to " + expect + ", but was " + result);
-    }
 }
