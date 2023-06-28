@@ -1,13 +1,17 @@
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Stack;
 import java.util.function.Predicate;
 
+import static java.math.BigDecimal.ZERO;
+
 public class Eval {
 
-    public static double evaluate(String expression) {
+    public static BigDecimal evaluate(String expression) {
         char[] tokens = expression.toCharArray();
 
         // Stack for numbers: 'values'
-        Stack<Double> values = new Stack<>();
+        Stack<BigDecimal> values = new Stack<>();
         // Stack for Operators: 'ops'
         Stack<Character> ops = new Stack<>();
 
@@ -35,12 +39,12 @@ public class Eval {
         return values.pop();
     }
 
-    private static int readValue(String expression, char[] tokens, Stack<Double> values, int start) {
+    private static int readValue(String expression, char[] tokens, Stack<BigDecimal> values, int start) {
         int end = start;
         do {
             end++;
         } while (end < tokens.length && tokens[end] >= '0' && tokens[end] <= '9');
-        values.push(Double.valueOf(expression.substring(start, end)));
+        values.push(new BigDecimal(expression.substring(start, end)));
         return end - start - 1;
     }
 
@@ -49,26 +53,26 @@ public class Eval {
         return op2 == '*' || op2 == '/';
     }
 
-    private static void applyOps(Stack<Character> ops, Stack<Double> values, Predicate<Character> opTest) {
+    private static void applyOps(Stack<Character> ops, Stack<BigDecimal> values, Predicate<Character> opTest) {
         while (!ops.isEmpty() && opTest.test(ops.peek())) {
             values.push(applyOp(ops.pop(), values.pop(), values.pop()));
         }
     }
 
     // A utility method to apply an operator 'op' on operands 'a' and 'b'. Return the result.
-    public static double applyOp(char op, double b, double a) {
+    public static BigDecimal applyOp(char op, BigDecimal b, BigDecimal a) {
         switch (op) {
             case '-':
-                return a - b;
+                return a.subtract(b);
             case '+':
-                return a + b;
+                return a.add(b);
             case '*':
-                return a * b;
+                return a.multiply(b);
             case '/':
-                if (b == 0) {
+                if (b.equals(ZERO)) {
                     throw new UnsupportedOperationException("Cannot divide by zero");
                 }
-                return a / b;
+                return a.divide(b, MathContext.DECIMAL64);
         }
         throw new UnsupportedOperationException("Invalid operator: " + op);
     }

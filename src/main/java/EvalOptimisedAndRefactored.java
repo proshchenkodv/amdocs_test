@@ -1,12 +1,16 @@
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Predicate;
 
+import static java.math.BigDecimal.ZERO;
+
 public class EvalOptimisedAndRefactored {
 
-    public static double evaluate(String expression) {
+    public static BigDecimal evaluate(String expression) {
         char[] tokens = expression.toCharArray();
-        Deque<Double> values = new ArrayDeque<>();
+        Deque<BigDecimal> values = new ArrayDeque<>();
         Deque<Character> operators = new ArrayDeque<>();
 
         for (int i = 0; i < tokens.length; i++) {
@@ -28,12 +32,12 @@ public class EvalOptimisedAndRefactored {
         return values.pop();
     }
 
-    private static int readValue(char[] tokens, Deque<Double> values, int start) {
+    private static int readValue(char[] tokens, Deque<BigDecimal> values, int start) {
         int count = 1;
         while (start + count < tokens.length && Character.isDigit(tokens[start + count])) {
             count++;
         }
-        values.push(Double.valueOf(String.valueOf(tokens, start, count--)));
+        values.push(new BigDecimal(String.valueOf(tokens, start, count--)));
         return count;
     }
 
@@ -41,25 +45,25 @@ public class EvalOptimisedAndRefactored {
         return operator2 == '*' || operator2 == '/';
     }
 
-    private static void applyOperators(Deque<Character> ops, Deque<Double> values, Predicate<Character> opTest) {
+    private static void applyOperators(Deque<Character> ops, Deque<BigDecimal> values, Predicate<Character> opTest) {
         while (!ops.isEmpty() && opTest.test(ops.peek())) {
             values.push(applyOperator(ops.pop(), values.pop(), values.pop()));
         }
     }
 
-    public static double applyOperator(char operator, double operand2, double operand1) {
+    public static BigDecimal applyOperator(char operator, BigDecimal operand2, BigDecimal operand1) {
         switch (operator) {
             case '-':
-                return operand1 - operand2;
+                return operand1.subtract(operand2);
             case '+':
-                return operand1 + operand2;
+                return operand1.add(operand2);
             case '*':
-                return operand1 * operand2;
+                return operand1.multiply(operand2);
             case '/':
-                if (operand2 == 0) {
+                if (operand2.equals(ZERO)) {
                     throw new UnsupportedOperationException("Cannot divide by zero");
                 }
-                return operand1 / operand2;
+                return operand1.divide(operand2, MathContext.DECIMAL64);
             default:
                 throw new UnsupportedOperationException("Invalid operator: " + operator);
         }
