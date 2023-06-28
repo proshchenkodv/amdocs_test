@@ -3,6 +3,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,12 +27,13 @@ class EvalTest {
         "1a+2b|3",
         "222 * ( 2 + 5 ) / 16|97.125",
         "2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10 + 2/10|1.8",
+        "13.5+12.5*3|51",
     })
     void testEval(String expression, BigDecimal expected) {
-        assertEquals(expected, Eval.evaluate(expression), "Eval");
+        assertEquals(expected, Eval.evaluate(expression).setScale(expected.scale(), RoundingMode.UP), "Eval");
         //Отдельному классу - отдельный тест.
         //Но правильно было бы не создавать второй класс, а вносить правки в существующий - увидеть разницу нам поможет git.
-        assertEquals(expected, EvalOptimisedAndRefactored.evaluate(expression), "EvalOptimisedAndRefactored");
+        assertEquals(expected, EvalOptimisedAndRefactored.evaluate(expression).setScale(expected.scale(), RoundingMode.UP), "EvalOptimisedAndRefactored");
     }
 
     @DisplayName("Should fail on evaluate expression: Eval")
@@ -45,6 +47,7 @@ class EvalTest {
         "'3 / 0'|java.lang.UnsupportedOperationException|Cannot divide by zero",
         "'1 2 3 + 4 )'|java.util.EmptyStackException|",
         "1(2+3|java.lang.UnsupportedOperationException|Invalid operator: (",
+        "13.5+12.5.3|java.lang.NumberFormatException|",
     })
     void testFailure_Eval(String expression, Class<? extends Throwable> exceptionType, String message) {
         Throwable throwable = assertThrows(exceptionType, () -> Eval.evaluate(expression));
@@ -66,6 +69,7 @@ class EvalTest {
         "'3 / 0'|java.lang.UnsupportedOperationException|Cannot divide by zero",
         "'1 2 3 + 4 )'|java.util.NoSuchElementException|",
         "1(2+3|java.lang.UnsupportedOperationException|Invalid operator: (",
+        "13.5+12.5.3|java.lang.NumberFormatException|",
     })
     void testFailure_EvalOptimisedAndRefactored(String expression, Class<? extends Throwable> exceptionType, String message) {
         Throwable throwable = assertThrows(exceptionType, () -> EvalOptimisedAndRefactored.evaluate(expression));

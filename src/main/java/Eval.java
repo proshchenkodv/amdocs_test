@@ -16,7 +16,7 @@ public class Eval {
         Stack<Character> ops = new Stack<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            if (tokens[i] >= '0' && tokens[i] <= '9') {
+            if (isDigit(tokens[i])) {
                 // Current token is a number, push it to stack for numbers
                 i += readValue(expression, tokens, values, i);
             } else if (tokens[i] == '(') {
@@ -39,11 +39,15 @@ public class Eval {
         return values.pop();
     }
 
+    private static boolean isDigit(char token) {
+        return token == '.' || token >= '0' && token <= '9';
+    }
+
     private static int readValue(String expression, char[] tokens, Stack<BigDecimal> values, int start) {
         int end = start;
         do {
             end++;
-        } while (end < tokens.length && tokens[end] >= '0' && tokens[end] <= '9');
+        } while (end < tokens.length && isDigit(tokens[end]));
         values.push(new BigDecimal(expression.substring(start, end)));
         return end - start - 1;
     }

@@ -14,7 +14,7 @@ public class EvalOptimisedAndRefactored {
         Deque<Character> operators = new ArrayDeque<>();
 
         for (int i = 0; i < tokens.length; i++) {
-            if (Character.isDigit(tokens[i])) {
+            if (isDigit(tokens[i])) {
                 i += readValue(tokens, values, i);
             } else if (tokens[i] == '(') {
                 operators.push(tokens[i]);
@@ -32,9 +32,13 @@ public class EvalOptimisedAndRefactored {
         return values.pop();
     }
 
+    private static boolean isDigit(char token) {
+        return token == '.' || Character.isDigit(token);
+    }
+
     private static int readValue(char[] tokens, Deque<BigDecimal> values, int start) {
         int count = 1;
-        while (start + count < tokens.length && Character.isDigit(tokens[start + count])) {
+        while (start + count < tokens.length && isDigit(tokens[start + count])) {
             count++;
         }
         values.push(new BigDecimal(String.valueOf(tokens, start, count--)));
