@@ -17,7 +17,7 @@ public class Eval {
             }
 
             // Current token is a number, push it to stack for numbers
-            if (tokens[i] > '0' && tokens[i] <= '9') {
+            if (tokens[i] >= '0' && tokens[i] <= '9') {
                 StringBuilder sbuf = new StringBuilder();
 
                 // There may be more than one digit in a number
